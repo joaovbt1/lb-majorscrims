@@ -413,12 +413,22 @@
       const json=await res.json();
       const text=json.contents;
       const rows=parseCSV(text);
-      const data=rows.filter(r=>r.length>=6&&/^\d+$/.test((r[5]||'').trim()));
+      console.log('RAW ROWS sample:', rows.slice(0,5));
+      // Try to detect header row and find rank column
+      // Skip rows where rank col is not numeric, also try col index 5
+      const data=rows.filter(r=>{
+        if(r.length<6) return false;
+        const maybeRank=(r[5]||'').trim();
+        return /^\d+$/.test(maybeRank);
+      });
+      console.log('Filtered data rows:', data.length, 'sample:', data.slice(0,3));
       all=data.map(r=>({
-        name:r[1]||'',xp:parseInt(r[2])||0,
-        kills:parseInt(r[3])||0,games:parseInt(r[4])||0,
+        name:(r[1]||'').trim(),
+        xp:parseInt(r[2])||0,
+        kills:parseInt(r[3])||0,
+        games:parseInt(r[4])||0,
         rank:parseInt(r[5])||9999
-      })).filter(p=>p.name!=='');
+      })).filter(p=>p.name!==''&&p.name.toLowerCase()!=='epic name');
       all.sort((a,b)=>b.xp-a.xp);
       document.getElementById('status-text').textContent=all.length+' jogadores · atualizado agora';
       document.getElementById('legend').style.display='flex';
