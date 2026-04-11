@@ -1,0 +1,76 @@
+name: Update leaderboard data
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch CSV and convert to JSON
+        run: |
+          python3 << 'PYEOF'
+          import urllib.request, csv, json, io
+          from datetime import datetime, timezone
+
+          url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRx3CFe-wdRBOLisZX_QjYLVw7ZEeQBRCw_jbbmOKVue2mZuzp7ZbS1bMiRuJoNEqwE9rYs_q4QN0wd/pub?gid=2097665043&single=true&output=csv"
+
+          with urllib.request.urlopen(url) as r:
+              raw = r.read().decode('utf-8')
+
+          reader = csv.reader(io.StringIO(raw))
+          rows = list(reader)
+
+          # Find header row
+          header_idx = next((i for i,r in enumerate(rows) if any('epic name' in c.lower() for c in r)), 0)
+          headers = [h.lower().strip() for h in rows[header_idx]]
+
+          col = lambda name: next((i for i,h in enumerate(headers) if name in h), -1)
+          ci_name  = col('epic name') if col('epic name') >= 0 else col('name')
+          ci_xp    = col('xp')
+          ci_kills = col('kill')
+          ci_games = col('game')
+          ci_rank  = col('rank')
+
+          players = []
+          for row in rows[header_idx+1:]:
+              if len(row) < 3: continue
+              name = row[ci_name].strip() if ci_name >= 0 else ''
+              if not name or name.lower() == 'epic name': continue
+              try:
+                  rank = int(row[ci_rank]) if ci_rank >= 0 else 9999
+              except:
+                  continue
+              players.append({
+                  'name':  name,
+                  'xp':    int(row[ci_xp])    if ci_xp    >= 0 else 0,
+                  'kills': int(row[ci_kills])  if ci_kills >= 0 else 0,
+                  'games': int(row[ci_games])  if ci_games >= 0 else 0,
+                  'rank':  rank,
+              })
+
+          players.sort(key=lambda p: p['xp'], reverse=True)
+
+          out = {
+              'updated': datetime.now(timezone.utc).isoformat(),
+              'players': players
+          }
+
+          with open('data.json', 'w') as f:
+              json.dump(out, f, ensure_ascii=False)
+
+          print(f"Saved {len(players)} players to data.json")
+          PYEOF
+
+      - name: Commit data.json
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git diff --staged --quiet || git commit -m "chore: update leaderboard data"
+          git push
