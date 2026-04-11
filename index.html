@@ -222,16 +222,20 @@
   }
   async function load(){
     try{
+      console.log('Fetching data.json...');
       const res=await fetch('data.json?t='+Date.now());
-      if(!res.ok)throw new Error();
+      console.log('Response status:', res.status, res.url);
+      if(!res.ok)throw new Error('HTTP '+res.status);
       const data=await res.json();
+      console.log('Players loaded:', (data.players||[]).length);
       all=data.players||[];
       const updated=data.updated?new Date(data.updated).toLocaleString('pt-BR'):'agora';
       document.getElementById('status-text').textContent=all.length+' jogadores · updates: 03h AM (GMT-3)';
       document.getElementById('legend').style.display='flex';
       render();
     }catch(e){
-      document.getElementById('table-area').innerHTML='<div class="state-box error">// ERRO AO CARREGAR DADOS</div>';
+      console.error('Load error:', e);
+      document.getElementById('table-area').innerHTML='<div class="state-box error">// ERRO AO CARREGAR DADOS<br><br>'+e.message+'</div>';
       document.getElementById('status-text').textContent='Erro ao carregar';
     }
   }
