@@ -177,7 +177,7 @@
     {max:750, label:'MS Gold',        icon:'🥇',cls:'b-gold'},
     {max:1000,label:'MS Bronze',      icon:'🥉',cls:'b-bronze'},
   ];
-  const gt=r=>TIERS.find(t=>r<=t.max)||TIERS[TIERS.length-1];
+  const gt=r=>r>1000?null:TIERS.find(t=>r<=t.max)||null;
   function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
   function hl(text,q){
     if(!q)return esc(text);
@@ -197,10 +197,12 @@
     if(!list.length){area.innerHTML='<div class="state-box">// NENHUM JOGADOR ENCONTRADO</div>';return}
     const tbody=list.map(p=>{
       const t=gt(p.rank);
+      const tierBadge=t?`<span class="badge ${t.cls}"><img src="${ICONS[t.imgKey]}" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:3px">${t.label}</span>`:'';
+      const tierIcon=t?`<img src="${ICONS[t.imgKey]}" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:6px">`:'';
       return `<tr class="${trCls(p.rank)}">
         <td class="rank-cell ${rc(p.rank)}">${p.rank}</td>
-        <td class="name-cell">${hl(p.name,q)}</td>
-        <td class="col-cargo"><span class="badge ${t.cls}">${t.icon} ${t.label}</span></td>
+        <td class="name-cell">${tierIcon}${hl(p.name,q)}</td>
+        <td class="col-cargo">${tierBadge}</td>
         <td class="xp-cell">${p.xp}</td>
         <td class="num col-kills">${p.kills}</td>
         <td class="num col-games">${p.games}</td>
