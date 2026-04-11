@@ -407,9 +407,11 @@
 
   async function load(){
     try{
-      const res=await fetch(S);
+      const proxy='https://api.allorigins.win/get?url='+encodeURIComponent(S);
+      const res=await fetch(proxy);
       if(!res.ok)throw new Error();
-      const text=await res.text();
+      const json=await res.json();
+      const text=json.contents;
       const rows=parseCSV(text);
       const data=rows.filter(r=>r.length>=6&&/^\d+$/.test((r[5]||'').trim()));
       all=data.map(r=>({
