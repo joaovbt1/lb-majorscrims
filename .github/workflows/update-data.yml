@@ -21,7 +21,7 @@ jobs:
           import urllib.request, csv, json, io, sys
           from datetime import datetime, timezone
 
-          url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRx3CFe-wdRBOLisZX_QjYLVw7ZEeQBRCw_jbbmOKVue2mZuzp7ZbS1bMiRuJoNEqwE9rYs_q4QN0wd/pub?gid=2097665043&single=true&output=csv"
+          url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTSCvzpu4sUPahTY9zaQ9EFtmmMqay88uqlseHRp5kYrujxe_q_denNRaU0zj2eDVEdJUrBSxcZqBGF/pub?output=csv"
 
           print("Fetching CSV...")
           try:
