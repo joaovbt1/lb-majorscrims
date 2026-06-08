@@ -191,7 +191,7 @@
     {max:1500, label:'MS Gold',        imgKey:'gold',        cls:'b-gold'},
     {max:2000,label:'MS Bronze',      imgKey:'bronze',      cls:'b-bronze'},
   ];
-  const gt=r=>r>1000?null:TIERS.find(t=>r<=t.max)||null;
+  const gt=r=>r>2000?null:TIERS.find(t=>r<=t.max)||null;
   function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
   function hl(text,q){
     if(!q)return esc(text);
